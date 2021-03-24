@@ -5,7 +5,15 @@ import (
 	"net/http"
 )
 
-func GetTimestamp(w http.ResponseWriter, r *http.Request) {
+type PomodoroServer struct {
+	timestamp int
+}
+
+func CreateHandlers() PomodoroServer {
+	return PomodoroServer{}
+}
+
+func (srv *PomodoroServer) GetTimestamp(w http.ResponseWriter, r *http.Request) {
 	log.Print("GET!") //TODO: remove
 
 }
