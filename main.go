@@ -30,10 +30,10 @@ func main() {
 
 	r := mux.NewRouter()
 
-	h := han.CreateHandlers()
+	h := han.CreateHandlers(db)
 
 	r.HandleFunc("/pomodoro", h.GetTimestamp).Methods("GET")
-	r.HandleFunc("/pomodoro", h.AddTimestamp).Methods("POST")
+	// r.HandleFunc("/pomodoro", h.AddTimestamp).Methods("POST")
 
 	var httpHandler http.Handler
 
