@@ -7,12 +7,26 @@ import (
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
+	"github.com/noisersup/dashboard-backend-pomodoro/database"
 	han "github.com/noisersup/dashboard-backend-pomodoro/handlers"
 )
 
 func main() {
 	corsPtr := flag.Bool("cors", false, "Enable CORS mode for locally debugging purposes.")
+	uriPtr := flag.String("uri","","Specify uri do mongodb database.")
 	flag.Parse()
+
+	if *uriPtr=="" { log.Fatalf("You must specify url address to database!")}
+
+	log.Printf("Connecting to database on %s",*uriPtr)
+	db,err := database.ConnectToDatabase(*uriPtr,"pomodoro","pomodoro")
+	if err != nil { log.Panic(err) }
+
+	defer func(){
+		if err = db.Disconnect(); err!=nil{
+			log.Fatalf("Problem with disconnecting: %s",err.Error())
+		}
+	}()
 
 	r := mux.NewRouter()
 

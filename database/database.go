@@ -33,3 +33,10 @@ func ConnectToDatabase(uri string, dbName string, collName string) (*Database,er
 
 	return &Database{client,coll},nil
 }
+
+func (db *Database) Disconnect() error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	return db.client.Disconnect(ctx)
+}
