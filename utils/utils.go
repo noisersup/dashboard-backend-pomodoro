@@ -2,9 +2,14 @@ package utils
 
 import (
 	"encoding/json"
+	"errors"
 	"log"
 	"net/http"
 )
+
+func Err(msg string, err error) error{
+	return errors.New("["+msg+"] "+err.Error())
+}
 
 func SendResponse(w http.ResponseWriter, response interface{}, statusCode int) {
 	w.Header().Set("Content-Type", "application/json")
