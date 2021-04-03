@@ -5,6 +5,6 @@ type Response struct {
 	Error     string `json:"error"`
 }
 
-type TimestampDb struct {
-	Timestamp int
+type Timestamp struct {
+	Timestamp int	 `json:"timestamp"`
 }

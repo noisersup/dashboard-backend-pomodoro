@@ -33,7 +33,7 @@ func main() {
 	h := han.CreateHandlers(db)
 
 	r.HandleFunc("/pomodoro", h.GetTimestamp).Methods("GET")
-	// r.HandleFunc("/pomodoro", h.AddTimestamp).Methods("POST")
+	r.HandleFunc("/pomodoro", h.SetTimestamp).Methods("POST")
 
 	var httpHandler http.Handler
 
@@ -47,6 +47,6 @@ func main() {
 		httpHandler = r
 	}
 
-	log.Printf("Starting http server on port :8000...")
+	log.Printf("Starting http server on port :8000...") //TODO: typo
 	log.Fatal(http.ListenAndServe(":8005", httpHandler))
 }

@@ -47,25 +47,24 @@ func (db *Database) GetTimestamp() (int, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	cur, err := db.coll.Find(ctx,  bson.D{{}}, options.Find())
-	if err != nil {return 0,err}
+	var timestamp models.Timestamp
+
+	err := db.coll.FindOne(ctx,  bson.M{"_id": "0"}).Decode(&timestamp)
 	
-	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
+	return timestamp.Timestamp, err
+}
+
+func (db *Database) SetTimestamp(timestamp int) (error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	var resp models.TimestampDb
+	options := options.Update().SetUpsert(true)
+	_, err := db.coll.UpdateOne(
+		ctx,
+		bson.M{"_id": "0"},
+		bson.D{
+			{"$set", bson.D{{"timestamp",timestamp},}},
+		},options)
 
-	for cur.Next(ctx){
-		err = cur.Decode(&resp)
-		if err != nil {return 0,err}
-	}
-	if err := cur.Err(); err != nil{
-		return 0,err
-	}
-
-	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-	cur.Close(ctx)
-
-	return resp.Timestamp, nil
+	return err
 }
