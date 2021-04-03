@@ -43,7 +43,7 @@ func (db *Database) Disconnect() error {
 	return db.client.Disconnect(ctx)
 }
 
-func (db *Database) GetTimestamp() (int, error) {
+func (db *Database) GetTimestamp() (*models.Timestamp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -51,10 +51,10 @@ func (db *Database) GetTimestamp() (int, error) {
 
 	err := db.coll.FindOne(ctx,  bson.M{"_id": "0"}).Decode(&timestamp)
 	
-	return timestamp.Timestamp, err
+	return &timestamp, err
 }
 
-func (db *Database) SetTimestamp(timestamp int) (error) {
+func (db *Database) SetTimestamp(timestamp int,timeLeft int) (error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -63,7 +63,7 @@ func (db *Database) SetTimestamp(timestamp int) (error) {
 		ctx,
 		bson.M{"_id": "0"},
 		bson.D{
-			{"$set", bson.D{{"timestamp",timestamp},}},
+			{"$set", bson.D{{"timestamp",timestamp},{"timeLeft",timeLeft}}},
 		},options)
 
 	return err

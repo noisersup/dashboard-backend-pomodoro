@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/noisersup/dashboard-backend-pomodoro/database"
 	"github.com/noisersup/dashboard-backend-pomodoro/models"
@@ -31,7 +32,8 @@ func (srv *PomodoroServer) GetTimestamp(w http.ResponseWriter, r *http.Request) 
 		utils.SendResponse(w,response,http.StatusInternalServerError)
 		return
 	}
-	response.Timestamp = ts;
+	response.Timestamp = ts.Timestamp
+	response.TimeLeft = ts.TimeLeft
 	utils.SendResponse(w, response, http.StatusOK)
 }
 
@@ -50,13 +52,21 @@ func (srv *PomodoroServer) SetTimestamp(w http.ResponseWriter, r *http.Request) 
 		utils.SendResponse(w,response,http.StatusBadRequest)
 		return
 	}
-	if err = srv.db.SetTimestamp(timestamp.Timestamp) ; err != nil{ // Database problems [500 code]
+
+	if timestamp.TimeLeft == 0 || int(time.Now().Unix()) - timestamp.Timestamp >= timestamp.TimeLeft{
+		response.Error = "Invalid properties"
+		utils.SendResponse(w,response,http.StatusBadRequest)
+		return
+	}
+
+	if err = srv.db.SetTimestamp(timestamp.Timestamp,timestamp.TimeLeft) ; err != nil{ // Database problems [500 code]
 		log.Printf("Database error: %s",err) //TODO: Log file
 
 		response.Error = "Database internal error"
 		utils.SendResponse(w,response,http.StatusInternalServerError)
 		return
 	}
-	response.Timestamp = timestamp.Timestamp;
+	response.Timestamp = timestamp.Timestamp
+	response.TimeLeft = timestamp.TimeLeft
 	utils.SendResponse(w, response, http.StatusOK)
 }
