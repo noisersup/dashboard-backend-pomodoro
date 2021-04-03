@@ -38,9 +38,9 @@ func (srv *PomodoroServer) GetTimestamp(w http.ResponseWriter, r *http.Request) 
 func (srv *PomodoroServer) SetTimestamp(w http.ResponseWriter, r *http.Request) {
 	log.Print("POST!") //TODO: remove
 
-	response := models.Response{}
+	var response models.Response
 
-	timestamp := models.Timestamp{} //TODO: change all to variables
+	var timestamp models.Timestamp
 
 	err := json.NewDecoder(r.Body).Decode(&timestamp)
 	if err != nil { // JSON decoding problems [400 code]
