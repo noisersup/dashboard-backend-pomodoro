@@ -47,6 +47,6 @@ func main() {
 		httpHandler = r
 	}
 
-	log.Printf("Starting http server on port :8000...") //TODO: typo
+	log.Printf("Starting http server on port :8005...")
 	log.Fatal(http.ListenAndServe(":8005", httpHandler))
 }
