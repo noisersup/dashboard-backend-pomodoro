@@ -14,33 +14,32 @@ import (
 	han "github.com/noisersup/dashboard-backend-pomodoro/handlers"
 )
 
-type DbConfig struct{
-	Address		string 
-	Port		int    
+type DbConfig struct {
+	Address string
+	Port    int
 }
 
 func main() {
-
-
 	corsPtr := flag.Bool("cors", false, "Enable CORS mode for locally debugging purposes.")
 	flag.Parse()
 
-	config := getVars() 
+	config := getVars()
 
+	var db database.Database
 
-	log.Printf("Connecting to database on %s:%d",config.Address,config.Port)
-	db,err := database.ConnectToDatabase(config.Address+":"+fmt.Sprint(config.Port),"pomodoro","pomodoro")
-	if err != nil { log.Panic(err) }
+	log.Print("Connecting to database...")
+	connectDB(&db, config)
+	log.Print("Database connected ", db)
 
-	defer func(){
-		if err = db.Disconnect(); err!=nil{
-			log.Fatalf("Problem with disconnecting: %s",err.Error())
+	defer func() {
+		if err := db.Disconnect(); err != nil {
+			log.Fatalf("Problem with disconnecting: %s", err.Error())
 		}
 	}()
 
 	r := mux.NewRouter()
 
-	h := han.CreateHandlers(db)
+	h := han.CreateHandlers(&db)
 
 	r.HandleFunc("/pomodoro", h.GetTimestamp).Methods("GET")
 	r.HandleFunc("/pomodoro", h.SetTimestamp).Methods("POST")
@@ -61,22 +60,34 @@ func main() {
 	log.Fatal(http.ListenAndServe(":8005", httpHandler))
 }
 
+func connectDB(dbVar *database.Database, config *DbConfig) {
+	for {
+		log.Printf("Connecting to database on %s:%d", config.Address, config.Port)
+		d, err := database.ConnectToDatabase(config.Address+":"+fmt.Sprint(config.Port), "tasks", "tasks")
+		if err == nil {
+			*dbVar = *d
+			break
+		}
+		log.Print(err)
+	}
 
-func getVars() *DbConfig {	
+}
+
+func getVars() *DbConfig {
 	var config DbConfig
 
 	config.Address = os.Getenv("DB_ADDRESS")
-	config.Port,_ = strconv.Atoi(os.Getenv("DB_PORT")) //default: 27017
+	config.Port, _ = strconv.Atoi(os.Getenv("DB_PORT")) //default: 27017
 
-	if config.Address=="" { 
+	if config.Address == "" {
 		log.Fatal("ENV variables did not set")
 	}
 
-	config.Address = "mongodb://"+config.Address
+	config.Address = "mongodb://" + config.Address
 
 	if config.Port == 0 {
 		log.Print("Port invalid or not provided. Setting default (27017)")
-		config.Port=27017
+		config.Port = 27017
 	}
 	return &config
 }
